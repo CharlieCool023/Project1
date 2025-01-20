@@ -93,12 +93,30 @@ function VerificationSuccessContent({ batchNumber }: VerificationSuccessContentP
 }
 
 export default function VerificationSuccess() {
-  const searchParams = useSearchParams();
-  const batchNumber = searchParams.get("id") ?? "";
+  const [batchNumber, setBatchNumber] = useState<string | null>(null);
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const batchNumberParam = searchParams.get("id");
+    if (batchNumberParam) {
+      setBatchNumber(batchNumberParam);
+    }
+  }, []);
+
+  if (!batchNumber) {
+    return (
+      <div className="container mx-auto py-8 space-y-6">
+        <div className="flex items-center justify-center text-red-500 mb-4">
+          <AlertCircle className="w-12 h-12 mr-2" />
+          <h1 className="text-3xl font-bold">Product ID Missing</h1>
+        </div>
+        <p className="text-center text-red-500">No product ID provided in the URL.</p>
+      </div>
+    );
+  }
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      {/* Pass batchNumber with correct type */}
       <VerificationSuccessContent batchNumber={batchNumber} />
     </Suspense>
   );
