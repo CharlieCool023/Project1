@@ -1,56 +1,53 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { getProductFromBlockchain, type Product } from "@/lib/kaleido";
 import { ProductDetails } from "@/app/(users)/components/product-details";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, AlertCircle } from "lucide-react";
 import Link from "next/link";
-import { getProductFromBlockchain, type Product } from "@/lib/kaleido";
 import { useToast } from "@/hooks/use-toast";
-import { useSearchParams } from "next/navigation";
 
-export default function VerificationSuccess() {
-  const searchParams = useSearchParams();
+// Define the type for the batchNumber prop
+interface VerificationSuccessContentProps {
+  batchNumber: string;
+}
+
+function VerificationSuccessContent({ batchNumber }: VerificationSuccessContentProps) {
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const batchNumber = searchParams.get("id") ?? "";
-  const { toast } = useToast()
+  const { toast } = useToast();
 
   useEffect(() => {
     async function fetchProduct() {
       try {
         if (batchNumber) {
-          console.log("Fetching product with ID:", batchNumber);
           const productDetails = await getProductFromBlockchain(batchNumber);
-          console.log("Product details:", productDetails);
           if (productDetails) {
             setProduct(productDetails);
           } else {
             throw new Error("Product not found. This product may not be authentic.");
           }
         } else {
-          throw new Error("No product ID provided.")
+          throw new Error("No product ID provided.");
         }
       } catch (error) {
-        console.error("Error fetching product:", error)
-        setError(error instanceof Error ? error.message : "Failed to fetch product details. Please try again later.")
+        setError(error instanceof Error ? error.message : "Failed to fetch product details. Please try again later.");
         toast({
           variant: "destructive",
           title: "Error",
-          description:
-            error instanceof Error ? error.message : "Failed to fetch product details. Please try again later.",
-        })
+          description: error instanceof Error ? error.message : "Failed to fetch product details. Please try again later.",
+        });
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
     }
     fetchProduct();
   }, [batchNumber, toast]);
 
-  if (isLoading) {
-    return <div>Loading product details...</div>;
-  }
+  if (isLoading) return <div>Loading product details...</div>;
 
   if (error || !product) {
     return (
@@ -58,7 +55,7 @@ export default function VerificationSuccess() {
         <div className="flex items-center justify-center text-red-500 mb-4">
           <AlertCircle className="w-12 h-12 mr-2" />
           <h1 className="text-3xl font-bold">Verification Failed</h1>
-        </div>;
+        </div>
         <p className="text-center text-red-500">{error}</p>
         <div className="flex justify-center">
           <Link href="/verify-products">
@@ -93,5 +90,16 @@ export default function VerificationSuccess() {
       </div>
     </div>
   );
-};
+}
 
+export default function VerificationSuccess() {
+  const searchParams = useSearchParams();
+  const batchNumber = searchParams.get("id") ?? "";
+
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      {/* Pass batchNumber with correct type */}
+      <VerificationSuccessContent batchNumber={batchNumber} />
+    </Suspense>
+  );
+}
