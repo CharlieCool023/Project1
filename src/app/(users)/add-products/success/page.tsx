@@ -4,12 +4,13 @@ interface SearchParams {
   id?: string; // Optional string
 }
 
-export default function AdditionSuccess({
+export default async function AdditionSuccess({
   searchParams,
 }: {
-  searchParams: SearchParams; // Explicit type for searchParams
+  searchParams: Promise<SearchParams>; // Treat searchParams as a promise
 }) {
-  const productId = searchParams?.id ?? ""; // Fallback to empty string if id is undefined
+  const resolvedParams = await searchParams; // Resolve the promise
+  const productId = resolvedParams?.id ?? ""; // Fallback to empty string if id is undefined
 
   return <AdditionSuccessClient productId={productId} />;
 }
