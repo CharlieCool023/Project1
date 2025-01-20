@@ -1,13 +1,15 @@
 import AdditionSuccessClient from "./addition-success-client";
 
-export default async function AdditionSuccess({
+interface SearchParams {
+  id?: string; // Optional string
+}
+
+export default function AdditionSuccess({
   searchParams,
 }: {
-  searchParams: { id?: string };
+  searchParams: SearchParams; // Explicit type for searchParams
 }) {
-  const productId = searchParams?.id ?? "";
+  const productId = searchParams?.id ?? ""; // Fallback to empty string if id is undefined
 
-  return (
-    <AdditionSuccessClient productId={productId} />
-  );
+  return <AdditionSuccessClient productId={productId} />;
 }
