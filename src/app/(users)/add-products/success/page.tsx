@@ -12,7 +12,7 @@ import { useSearchParams } from "next/navigation";
 
 export default function AdditionSuccess() {
   const searchParams = useSearchParams();
-  const batchNumber = searchParams.get("id");
+  const batchNumber = searchParams.get("id") ?? "";
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -78,7 +78,7 @@ export default function AdditionSuccess() {
         <h1 className="text-3xl font-bold">Product Added Successfully</h1>
       </div>
       <ProductDetails
-        productId={batchNumber}
+        productId={batchNumber} // Now `batchNumber` is guaranteed to be a string
         batchNumber={product.batchNumber}
         productName={product.productName}
         manufacturingDate={product.manufacturingDate}
