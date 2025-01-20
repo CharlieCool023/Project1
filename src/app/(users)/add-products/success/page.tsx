@@ -1,11 +1,13 @@
-import AdditionSuccessClient from "./addition-success-client";
+import { Suspense } from 'react'
+import AdditionSuccessClient from './addition-success-client'
 
-interface SearchParams {
-  id?: string;
+export default function AdditionSuccess({ searchParams }: { searchParams: { id: string } }) {
+  const productId = searchParams.id
+
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AdditionSuccessClient productId={productId} />
+    </Suspense>
+  )
 }
 
-export default function AdditionSuccess({ searchParams }: { searchParams: SearchParams }) {
-  const productId = searchParams?.id || "default-id"; // Fallback if 'id' is undefined
-
-  return <AdditionSuccessClient productId={productId} />;
-}
