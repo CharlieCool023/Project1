@@ -9,6 +9,7 @@ import { toast, useToast } from "@/hooks/use-toast"
 import { getProductFromBlockchain } from "@/lib/kaleido"
 import { getIPFSImageUrl } from "@/lib/ipfs"
 import { Html5QrcodeScanner } from "html5-qrcode"
+import { useUser } from "@clerk/nextjs"  // Import useUser hook from Clerk
 
 function QrScanner({ onResult }: { onResult: (result: string) => void }) {
   const scannerRef = useRef<HTMLDivElement>(null)
@@ -31,9 +32,17 @@ function QrScanner({ onResult }: { onResult: (result: string) => void }) {
 }
 
 export default function VerifyProducts() {
+  const { isSignedIn, isLoaded } = useUser() // Check if the user is signed in and if the user data is loaded
   const [productId, setProductId] = useState("")
   const [showScanner, setShowScanner] = useState(false)
   const router = useRouter()
+
+  // If the user is not signed in and the user data is loaded, redirect to the sign-in page
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) {
+      router.push("/sign-in")  // Adjust the path to your sign-in page
+    }
+  }, [isLoaded, isSignedIn, router])
 
   const handleVerify = async () => {
     try {
@@ -94,4 +103,3 @@ export default function VerifyProducts() {
     </div>
   )
 }
-

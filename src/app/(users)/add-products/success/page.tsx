@@ -1,19 +1,21 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 import { ProductDetails } from "@/app/(users)/components/product-details"
 import { Button } from "@/components/ui/button"
 import { CheckCircle, AlertCircle } from "lucide-react"
-import Link from "next/link"
+import Link from "next/link";
 import { getProductFromBlockchain, type Product } from "@/lib/kaleido"
 import { QRCodeSVG } from "qrcode.react"
 import { useToast } from "@/hooks/use-toast"
+import { useSearchParams } from 'next/navigation';
 
-export default function AdditionSuccess({ searchParams }: { searchParams: { id: string } }) {
+export default function AdditionSuccess() {
   const [product, setProduct] = useState<Product | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const batchNumber = searchParams.id
+  const searchParams = useSearchParams()
+  const batchNumber = searchParams.get("id") ?? "";
   const { toast } = useToast()
 
   useEffect(() => {
@@ -21,7 +23,7 @@ export default function AdditionSuccess({ searchParams }: { searchParams: { id: 
       try {
         if (batchNumber) {
           console.log("Fetching product with batch number:", batchNumber)
-          const productDetails = await getProductFromBlockchain(batchNumber)
+          const productDetails = await getProductFromBlockchain(batchNumber);
           console.log("Product details:", productDetails)
           if (productDetails) {
             setProduct(productDetails)
@@ -45,7 +47,7 @@ export default function AdditionSuccess({ searchParams }: { searchParams: { id: 
       }
     }
     fetchProduct()
-  }, [batchNumber, toast])
+  }, [batchNumber, toast]);
 
   if (isLoading) {
     return <div>Loading product details...</div>
@@ -77,7 +79,7 @@ export default function AdditionSuccess({ searchParams }: { searchParams: { id: 
       <ProductDetails
         productId={batchNumber}
         batchNumber={product.batchNumber}
-        productName={product.productName}
+          productName={product.productName} 
         manufacturingDate={product.manufacturingDate}
         expiryDate={product.expiryDate}
         nafdacNumber={product.nafdacNumber}
@@ -86,7 +88,7 @@ export default function AdditionSuccess({ searchParams }: { searchParams: { id: 
       <div className="flex justify-center items-center space-x-4">
         <div className="text-center">
           <h2 className="text-xl font-semibold mb-2">Product QR Code</h2>
-          <QRCodeSVG value={batchNumber} size={150} />
+          <QRCodeSVG value={batchNumber} size={150} /> 
         </div>
         <Link href="/add-products">
           <Button>Add Another Product</Button>

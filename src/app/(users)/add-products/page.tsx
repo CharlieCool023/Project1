@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { uploadToIPFS } from "@/lib/ipfs"
 import { addProductToBlockchain, getProductFromBlockchain } from "@/lib/kaleido"
 import { Loader2 } from 'lucide-react'
-import type { Product } from '@/lib/kaleido';
+import { useAuth } from '@clerk/clerk-react'  // Import Clerk's useAuth hook
 
 const formSchema = z.object({
   batchNumber: z.string().min(1, { message: "Batch number is required." }),
@@ -29,6 +29,16 @@ export default function AddProductForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
 
+  // Clerk authentication hook
+  const { isSignedIn } = useAuth() 
+
+  // Redirect to sign-in if not authenticated
+  useEffect(() => {
+    if (!isSignedIn) {
+      router.push('/sign-in')  // Redirect to sign-in page if not authenticated
+    }
+  }, [isSignedIn, router])
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -39,8 +49,6 @@ export default function AddProductForm() {
       nafdacNumber: "",
     },
   })
-
-  console.log('Form values:', form.getValues());
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
@@ -227,4 +235,3 @@ export default function AddProductForm() {
     </Card>
   )
 }
-

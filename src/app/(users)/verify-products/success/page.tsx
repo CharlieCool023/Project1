@@ -1,31 +1,33 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { ProductDetails } from "@/app/(users)/components/product-details"
-import { Button } from "@/components/ui/button"
-import { CheckCircle, AlertCircle } from "lucide-react"
-import Link from "next/link"
-import { getProductFromBlockchain, type Product } from "@/lib/kaleido"
-import { useToast } from "@/hooks/use-toast"
+import { useEffect, useState } from "react";
+import { ProductDetails } from "@/app/(users)/components/product-details";
+import { Button } from "@/components/ui/button";
+import { CheckCircle, AlertCircle } from "lucide-react";
+import Link from "next/link";
+import { getProductFromBlockchain, type Product } from "@/lib/kaleido";
+import { useToast } from "@/hooks/use-toast";
+import { useSearchParams } from "next/navigation";
 
-export default function VerificationSuccess({ searchParams }: { searchParams: { id: string } }) {
-  const [product, setProduct] = useState<Product | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const productId = searchParams.id
+export default function VerificationSuccess() {
+  const searchParams = useSearchParams();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const batchNumber = searchParams.get("id") ?? "";
   const { toast } = useToast()
 
   useEffect(() => {
     async function fetchProduct() {
       try {
-        if (productId) {
-          console.log("Fetching product with ID:", productId)
-          const productDetails = await getProductFromBlockchain(productId)
-          console.log("Product details:", productDetails)
+        if (batchNumber) {
+          console.log("Fetching product with ID:", batchNumber);
+          const productDetails = await getProductFromBlockchain(batchNumber);
+          console.log("Product details:", productDetails);
           if (productDetails) {
-            setProduct(productDetails)
+            setProduct(productDetails);
           } else {
-            throw new Error("Product not found. This product may not be authentic.")
+            throw new Error("Product not found. This product may not be authentic.");
           }
         } else {
           throw new Error("No product ID provided.")
@@ -43,11 +45,11 @@ export default function VerificationSuccess({ searchParams }: { searchParams: { 
         setIsLoading(false)
       }
     }
-    fetchProduct()
-  }, [productId, toast])
+    fetchProduct();
+  }, [batchNumber, toast]);
 
   if (isLoading) {
-    return <div>Loading product details...</div>
+    return <div>Loading product details...</div>;
   }
 
   if (error || !product) {
@@ -56,7 +58,7 @@ export default function VerificationSuccess({ searchParams }: { searchParams: { 
         <div className="flex items-center justify-center text-red-500 mb-4">
           <AlertCircle className="w-12 h-12 mr-2" />
           <h1 className="text-3xl font-bold">Verification Failed</h1>
-        </div>
+        </div>;
         <p className="text-center text-red-500">{error}</p>
         <div className="flex justify-center">
           <Link href="/verify-products">
@@ -64,7 +66,7 @@ export default function VerificationSuccess({ searchParams }: { searchParams: { 
           </Link>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -73,21 +75,23 @@ export default function VerificationSuccess({ searchParams }: { searchParams: { 
         <CheckCircle className="w-12 h-12 mr-2" />
         <h1 className="text-3xl font-bold">Verification Successful</h1>
       </div>
-      <ProductDetails
-        productId={productId}
-        batchNumber={product.batchNumber}
-        productName={product.productName}
-        manufacturingDate={product.manufacturingDate}
-        expiryDate={product.expiryDate}
-        nafdacNumber={product.nafdacNumber}
-        productImage={product.productImage}
-      />
+      {product && (
+        <ProductDetails
+          productId={batchNumber}
+          batchNumber={product.batchNumber}
+          productName={product.productName}
+          manufacturingDate={product.manufacturingDate}
+          expiryDate={product.expiryDate}
+          nafdacNumber={product.nafdacNumber}
+          productImage={product.productImage}
+        />
+      )}
       <div className="flex justify-center">
         <Link href="/verify-products">
           <Button>Verify Another Product</Button>
         </Link>
       </div>
     </div>
-  )
-}
+  );
+};
 
