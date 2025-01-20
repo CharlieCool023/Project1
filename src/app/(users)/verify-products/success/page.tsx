@@ -1,19 +1,18 @@
-'use client'
-import { useEffect, useState } from "react";
-import { ProductDetails } from "@/app/(users)/components/product-details";
-import { Button } from "@/components/ui/button";
-import { CheckCircle, AlertCircle } from "lucide-react";
-import Link from "next/link";
-import { getProductFromBlockchain, type Product } from "@/lib/kaleido";
-import { useToast } from "@/hooks/use-toast";
-import { useSearchParams } from "next/navigation";
+"use client"
 
-export default function VerificationSuccess() {
+import { useEffect, useState } from "react"
+import { ProductDetails } from "@/app/(users)/components/product-details"
+import { Button } from "@/components/ui/button"
+import { CheckCircle, AlertCircle } from "lucide-react"
+import Link from "next/link"
+import { getProductFromBlockchain, type Product } from "@/lib/kaleido"
+import { useToast } from "@/hooks/use-toast"
+
+export default function VerificationSuccess({ searchParams }: { searchParams: { id: string } }) {
   const [product, setProduct] = useState<Product | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const searchParams = useSearchParams();
-  const batchNumber = searchParams.get("id");
+  const productId = searchParams.id
   const { toast } = useToast()
 
   useEffect(() => {
@@ -21,9 +20,9 @@ export default function VerificationSuccess() {
       try {
         if (productId) {
           console.log("Fetching product with ID:", productId)
-          const productDetails = await getProductFromBlockchain(batchNumber)
+          const productDetails = await getProductFromBlockchain(productId)
           console.log("Product details:", productDetails)
-          if (productDetails && batchNumber) {
+          if (productDetails) {
             setProduct(productDetails)
           } else {
             throw new Error("Product not found. This product may not be authentic.")
@@ -45,7 +44,7 @@ export default function VerificationSuccess() {
       }
     }
     fetchProduct()
-  }, [batchNumber, toast])
+  }, [productId, toast])
 
   if (isLoading) {
     return <div>Loading product details...</div>
@@ -75,7 +74,7 @@ export default function VerificationSuccess() {
         <h1 className="text-3xl font-bold">Verification Successful</h1>
       </div>
       <ProductDetails
-        productId={batchNumber}
+        productId={productId}
         batchNumber={product.batchNumber}
         productName={product.productName}
         manufacturingDate={product.manufacturingDate}
@@ -91,3 +90,4 @@ export default function VerificationSuccess() {
     </div>
   )
 }
+
