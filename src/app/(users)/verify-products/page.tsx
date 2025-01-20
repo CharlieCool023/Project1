@@ -1,85 +1,69 @@
-"use client";
+"use client"
 
-import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@clerk/nextjs";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { QrCode, Search } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
-import { getProductFromBlockchain } from "@/lib/kaleido";
-import { getIPFSImageUrl } from "@/lib/ipfs";
-import { Html5QrcodeScanner } from "html5-qrcode";
+import { useState, useRef, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { QrCode, Search } from "lucide-react"
+import { toast, useToast } from "@/hooks/use-toast"
+import { getProductFromBlockchain } from "@/lib/kaleido"
+import { getIPFSImageUrl } from "@/lib/ipfs"
+import { Html5QrcodeScanner } from "html5-qrcode"
 
 function QrScanner({ onResult }: { onResult: (result: string) => void }) {
-  const scannerRef = useRef<HTMLDivElement>(null);
+  const scannerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (scannerRef.current) {
-      const scanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: 250 }, false);
-      scanner.render(
-        (decodedText) => {
-          onResult(decodedText);
-          scanner.clear();
-        },
-        console.error
-      );
+      const scanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: 250 }, false)
+      scanner.render((decodedText) => {
+        onResult(decodedText)
+        scanner.clear()
+      }, console.error)
 
       return () => {
-        scanner.clear();
-      };
+        scanner.clear()
+      }
     }
-  }, [onResult]);
+  }, [onResult])
 
-  return <div id="qr-reader" ref={scannerRef} />;
+  return <div id="qr-reader" ref={scannerRef} />
 }
 
 export default function VerifyProducts() {
-  const [productId, setProductId] = useState("");
-  const [showScanner, setShowScanner] = useState(false);
-  const router = useRouter();
-  const { isSignedIn } = useAuth();
-
-  // Redirect unauthenticated users
-  useEffect(() => {
-    if (!isSignedIn) {
-      router.push("/sign-in"); // Adjust the path to your sign-in page
-    }
-  }, [isSignedIn, router]);
+  const [productId, setProductId] = useState("")
+  const [showScanner, setShowScanner] = useState(false)
+  const router = useRouter()
 
   const handleVerify = async () => {
     try {
-      const product = await getProductFromBlockchain(productId);
+      const product = await getProductFromBlockchain(productId)
       if (product) {
         const productWithImageUrl = {
           ...product,
           productImage: getIPFSImageUrl(product.productImage),
-        };
-        router.push(`/verify-products/success?id=${productId}`);
+        }
+        router.push(`/verify-products/success?id=${productId}`)
       } else {
         toast({
           title: "Product Not Authenticated",
           description: "This product is not found in our records. Please check the ID and try again.",
           variant: "destructive",
-        });
+        })
       }
     } catch (error) {
-      console.error("Failed to verify product:", error);
+      console.error("Failed to verify product:", error)
       toast({
         title: "Verification Error",
         description: "Failed to verify product. Please try again later.",
         variant: "destructive",
-      });
+      })
     }
-  };
+  }
 
   const handleScan = (result: string) => {
-    setProductId(result);
-    setShowScanner(false);
-  };
-
-  if (!isSignedIn) {
-    return null; // Prevent rendering while redirecting
+    setProductId(result)
+    setShowScanner(false)
   }
 
   return (
@@ -108,5 +92,6 @@ export default function VerifyProducts() {
         </div>
       )}
     </div>
-  );
+  )
 }
+
