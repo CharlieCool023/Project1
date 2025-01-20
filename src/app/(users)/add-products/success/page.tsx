@@ -1,20 +1,23 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { ProductDetails } from "@/app/(users)/components/product-details"
-import { Button } from "@/components/ui/button"
-import { CheckCircle, AlertCircle } from "lucide-react"
-import Link from "next/link"
-import { getProductFromBlockchain, type Product } from "@/lib/kaleido"
-import { QRCodeSVG } from "qrcode.react"
-import { useToast } from "@/hooks/use-toast"
+import { useEffect, useState } from "react";
+import { ProductDetails } from "@/app/(users)/components/product-details";
+import { Button } from "@/components/ui/button";
+import { CheckCircle, AlertCircle } from "lucide-react";
+import Link from "next/link";
+import { getProductFromBlockchain, type Product } from "@/lib/kaleido";
+import { QRCodeSVG } from "qrcode.react";
+import { useToast } from "@/hooks/use-toast";
+import { useSearchParams } from "next/navigation";
 
-export default function AdditionSuccess({ searchParams }: { searchParams: { id: string } }) {
-  const [product, setProduct] = useState<Product | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const batchNumber = searchParams.id
-  const { toast } = useToast()
+export default function AdditionSuccess() {
+  const searchParams = useSearchParams();
+  const batchNumber = searchParams.get("id");
+  const [product, setProduct] = useState<Product | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
+  const id = searchParams.get("id");
 
   useEffect(() => {
     async function fetchProduct() {
@@ -44,7 +47,7 @@ export default function AdditionSuccess({ searchParams }: { searchParams: { id: 
         setIsLoading(false)
       }
     }
-    fetchProduct()
+    fetchProduct();
   }, [batchNumber, toast])
 
   if (isLoading) {
@@ -79,7 +82,7 @@ export default function AdditionSuccess({ searchParams }: { searchParams: { id: 
         batchNumber={product.batchNumber}
         productName={product.productName}
         manufacturingDate={product.manufacturingDate}
-        expiryDate={product.expiryDate}
+        expiryDate={product.expiryDate}     
         nafdacNumber={product.nafdacNumber}
         productImage={product.productImage}
       />
@@ -95,4 +98,3 @@ export default function AdditionSuccess({ searchParams }: { searchParams: { id: 
     </div>
   )
 }
-
