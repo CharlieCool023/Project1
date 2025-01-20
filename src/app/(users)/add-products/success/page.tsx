@@ -1,12 +1,13 @@
-import { Suspense } from 'react';
-import AdditionSuccessClient from './addition-success-client';
+import AdditionSuccessClient from "./addition-success-client";
 
-export default function AdditionSuccess({ searchParams }: { searchParams: { id?: string } }) {
-  const productId = searchParams?.id;
+export default async function AdditionSuccess({
+  searchParams,
+}: {
+  searchParams: { id?: string };
+}) {
+  const productId = searchParams?.id ?? "";
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <AdditionSuccessClient productId={productId || ''} />
-    </Suspense>
+    <AdditionSuccessClient productId={productId} />
   );
 }
