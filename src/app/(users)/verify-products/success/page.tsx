@@ -14,18 +14,25 @@ export default function VerificationSuccess() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  const [isClient, setIsClient] = useState(false) // Add client-side state
   const router = useRouter()
-  const { id } = router.query // Get the product ID from the query string
 
   const { toast } = useToast()
 
   useEffect(() => {
-    if (!id) return // Skip if the id is not available yet (e.g., during initial render)
+    // Ensure that the code is running client-side
+    setIsClient(typeof window !== "undefined")
+  }, [])
+
+  useEffect(() => {
+    if (!isClient || !router.query.id) return // Ensure we are client-side and query params are available
+
+    const productId = router.query.id as string
 
     async function fetchProduct() {
       try {
-        console.log("Fetching product with ID:", id)
-        const productDetails = await getProductFromBlockchain(id as string) // Ensure `id` is a string
+        console.log("Fetching product with ID:", productId)
+        const productDetails = await getProductFromBlockchain(productId)
         console.log("Product details:", productDetails)
         if (productDetails) {
           setProduct(productDetails)
@@ -47,7 +54,7 @@ export default function VerificationSuccess() {
     }
 
     fetchProduct()
-  }, [id, toast])
+  }, [isClient, router.query.id, toast])
 
   if (isLoading) {
     return <div>Loading product details...</div>
@@ -77,7 +84,7 @@ export default function VerificationSuccess() {
         <h1 className="text-3xl font-bold">Verification Successful</h1>
       </div>
       <ProductDetails
-        productId={id as string}
+        productId={router.query.id as string}
         batchNumber={product.batchNumber}
         productName={product.productName}
         manufacturingDate={product.manufacturingDate}
