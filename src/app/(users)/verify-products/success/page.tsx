@@ -7,37 +7,28 @@ import { CheckCircle, AlertCircle } from "lucide-react"
 import Link from "next/link"
 import { getProductFromBlockchain, type Product } from "@/lib/kaleido"
 import { useToast } from "@/hooks/use-toast"
-import { useRouter } from "next/router"
 
-export default function VerificationSuccess() {
+export default function VerificationSuccess({ searchParams }: { searchParams: { id: string } }) {
   const [product, setProduct] = useState<Product | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
-  const [isClient, setIsClient] = useState(false) // Add client-side state
-  const router = useRouter()
-
+  const productId = searchParams.id
   const { toast } = useToast()
 
   useEffect(() => {
-    // Ensure that the code is running client-side
-    setIsClient(typeof window !== "undefined")
-  }, [])
-
-  useEffect(() => {
-    if (!isClient || !router.query.id) return // Ensure we are client-side and query params are available
-
-    const productId = router.query.id as string
-
     async function fetchProduct() {
       try {
-        console.log("Fetching product with ID:", productId)
-        const productDetails = await getProductFromBlockchain(productId)
-        console.log("Product details:", productDetails)
-        if (productDetails) {
-          setProduct(productDetails)
+        if (productId) {
+          console.log("Fetching product with ID:", productId)
+          const productDetails = await getProductFromBlockchain(productId)
+          console.log("Product details:", productDetails)
+          if (productDetails) {
+            setProduct(productDetails)
+          } else {
+            throw new Error("Product not found. This product may not be authentic.")
+          }
         } else {
-          throw new Error("Product not found. This product may not be authentic.")
+          throw new Error("No product ID provided.")
         }
       } catch (error) {
         console.error("Error fetching product:", error)
@@ -52,9 +43,8 @@ export default function VerificationSuccess() {
         setIsLoading(false)
       }
     }
-
     fetchProduct()
-  }, [isClient, router.query.id, toast])
+  }, [productId, toast])
 
   if (isLoading) {
     return <div>Loading product details...</div>
@@ -84,7 +74,7 @@ export default function VerificationSuccess() {
         <h1 className="text-3xl font-bold">Verification Successful</h1>
       </div>
       <ProductDetails
-        productId={router.query.id as string}
+        productId={productId}
         batchNumber={product.batchNumber}
         productName={product.productName}
         manufacturingDate={product.manufacturingDate}
@@ -100,3 +90,4 @@ export default function VerificationSuccess() {
     </div>
   )
 }
+
