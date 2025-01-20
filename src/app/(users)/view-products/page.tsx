@@ -20,7 +20,7 @@ export default function ViewProducts() {
       try {
         // In a real-world scenario, you'd fetch a list of product IDs first
         // For now, we'll simulate fetching 5 products
-        const productIds = ['2002002']; // Replace with actual product IDs
+        const productIds = ['2002002', '0905']; // Replace with actual product IDs
         const fetchedProducts = await Promise.all(
           productIds.map(async (id) => {
             const product = await getProductFromBlockchain(id);
