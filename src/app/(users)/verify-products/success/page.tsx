@@ -7,28 +7,30 @@ import { CheckCircle, AlertCircle } from "lucide-react"
 import Link from "next/link"
 import { getProductFromBlockchain, type Product } from "@/lib/kaleido"
 import { useToast } from "@/hooks/use-toast"
+import { useRouter } from "next/router"
 
-export default function VerificationSuccess({ searchParams }: { searchParams: { id: string } }) {
+export default function VerificationSuccess() {
   const [product, setProduct] = useState<Product | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const productId = searchParams.id
+
+  const router = useRouter()
+  const { id } = router.query // Get the product ID from the query string
+
   const { toast } = useToast()
 
   useEffect(() => {
+    if (!id) return // Skip if the id is not available yet (e.g., during initial render)
+
     async function fetchProduct() {
       try {
-        if (productId) {
-          console.log("Fetching product with ID:", productId)
-          const productDetails = await getProductFromBlockchain(productId)
-          console.log("Product details:", productDetails)
-          if (productDetails) {
-            setProduct(productDetails)
-          } else {
-            throw new Error("Product not found. This product may not be authentic.")
-          }
+        console.log("Fetching product with ID:", id)
+        const productDetails = await getProductFromBlockchain(id as string) // Ensure `id` is a string
+        console.log("Product details:", productDetails)
+        if (productDetails) {
+          setProduct(productDetails)
         } else {
-          throw new Error("No product ID provided.")
+          throw new Error("Product not found. This product may not be authentic.")
         }
       } catch (error) {
         console.error("Error fetching product:", error)
@@ -43,8 +45,9 @@ export default function VerificationSuccess({ searchParams }: { searchParams: { 
         setIsLoading(false)
       }
     }
+
     fetchProduct()
-  }, [productId, toast])
+  }, [id, toast])
 
   if (isLoading) {
     return <div>Loading product details...</div>
@@ -74,7 +77,7 @@ export default function VerificationSuccess({ searchParams }: { searchParams: { 
         <h1 className="text-3xl font-bold">Verification Successful</h1>
       </div>
       <ProductDetails
-        productId={productId}
+        productId={id as string}
         batchNumber={product.batchNumber}
         productName={product.productName}
         manufacturingDate={product.manufacturingDate}
@@ -90,4 +93,3 @@ export default function VerificationSuccess({ searchParams }: { searchParams: { 
     </div>
   )
 }
-
