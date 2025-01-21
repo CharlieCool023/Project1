@@ -2,6 +2,7 @@
 import { Element, Link as LinkScroll } from "react-scroll";
 import Button from "./button";
 import Image from "next/image";
+import Link from "next/link";
 
 const Hero = () => {
   return (
@@ -19,9 +20,12 @@ const Hero = () => {
               Our blockchain-based product verification system is designed to be easy to use, quick to implement, and incredibly secure. Track and verify your products with transparency and confidence.
             </p>
 
-            <LinkScroll to="features" offset={-100} spy smooth>
-              <Button icon="/images/zap.svg">Try it now</Button>
-            </LinkScroll>
+            {/* <LinkScroll to="features" offset={-100} spy smooth>
+              <Button icon="/images/zap.svg">Learn More</Button>
+            </LinkScroll> */}
+            <Link href={"/verify"}>
+            <Button icon="/images/zap.svg">Get Started</Button>
+            </Link>
           </div>
 
           <div className="absolute -top-32 left-[calc(50%-340px)] w-[1230px] pointer-events-none hero-img_res">
