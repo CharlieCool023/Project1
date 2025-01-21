@@ -1,58 +1,52 @@
-"use client"
+"use client";
 
-import { Suspense, useEffect, useState } from "react"
-import { ProductDetails } from "@/app/(users)/components/product-details"
-import { Button } from "@/components/ui/button"
-import { CheckCircle, AlertCircle } from "lucide-react"
-import Link from "next/link"
-import { getProductFromBlockchain, type Product } from "@/lib/kaleido"
-import { QRCodeSVG } from "qrcode.react"
-import { useToast } from "@/hooks/use-toast"
-import { useSearchParams } from "next/navigation"
+import { Suspense, useEffect, useState } from "react";
+import { ProductDetails } from "@/app/(users)/components/product-details";
+import { Button } from "@/components/ui/button";
+import { CheckCircle, AlertCircle } from "lucide-react";
+import Link from "next/link";
+import { getProductFromBlockchain, type Product } from "@/lib/kaleido";
+import { QRCodeSVG } from "qrcode.react";
+import { useToast } from "@/hooks/use-toast";
+import { useSearchParams } from "next/navigation";
 
 // Component for rendering the product details and handling the loading state
-const AdditionSuccessContent = () => {
-  const [product, setProduct] = useState<Product | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const searchParams = useSearchParams()
-  const batchNumber = searchParams.get("id") ?? ""
-  const { toast } = useToast()
+const AdditionSuccessContent = ({ batchNumber }: { batchNumber: string }) => {
+  const [product, setProduct] = useState<Product | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     async function fetchProduct() {
       try {
         if (batchNumber) {
-          console.log("Fetching product with batch number:", batchNumber)
-          const productDetails = await getProductFromBlockchain(batchNumber)
-          console.log("Product details:", productDetails)
+          const productDetails = await getProductFromBlockchain(batchNumber);
           if (productDetails) {
-            setProduct(productDetails)
+            setProduct(productDetails);
           } else {
-            throw new Error("Product details not available. The product may have been added, but retrieval failed.")
+            throw new Error("Product details not available. Retrieval failed.");
           }
         } else {
-          throw new Error("No batch number provided.")
+          throw new Error("No batch number provided.");
         }
       } catch (error) {
-        console.error("Error fetching product:", error)
-        setError(error instanceof Error ? error.message : "Failed to fetch product details. Please try again later.")
+        const errorMessage =
+          error instanceof Error ? error.message : "Failed to fetch product details.";
+        setError(errorMessage);
         toast({
           variant: "destructive",
           title: "Error",
-          description:
-            error instanceof Error ? error.message : "Failed to fetch product details. Please try again later.",
-        })
+          description: errorMessage,
+        });
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
     }
-    fetchProduct()
-  }, [batchNumber, toast])
+    fetchProduct();
+  }, [batchNumber, toast]);
 
-  if (isLoading) {
-    return <div>Loading product details...</div>
-  }
+  if (isLoading) return <div>Loading product details...</div>;
 
   if (error || !product) {
     return (
@@ -68,7 +62,7 @@ const AdditionSuccessContent = () => {
           </Link>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -96,13 +90,16 @@ const AdditionSuccessContent = () => {
         </Link>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default function AdditionSuccess() {
+  const searchParams = useSearchParams();
+  const batchNumber = searchParams.get("id") ?? "";
+
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <AdditionSuccessContent />
+      <AdditionSuccessContent batchNumber={batchNumber} />
     </Suspense>
-  )
+  );
 }

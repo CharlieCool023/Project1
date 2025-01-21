@@ -15,10 +15,12 @@ export function Header() {
           <h1 className="text-xl font-bold">Product Verification System</h1>
           <nav className="flex items-center space-x-1">
             <UserButton />
-            <Button variant="ghost" size="sm" onClick={() => <SignOutButton />}>
-              <LogOut className="h-5 w-5 mr-2" />
-              Sign out
-            </Button>
+            <SignOutButton>
+              <Button variant="ghost" size="sm">
+                <LogOut className="h-5 w-5 mr-2" />
+                Sign out
+              </Button>
+            </SignOutButton>
           
           </nav>
         </div>

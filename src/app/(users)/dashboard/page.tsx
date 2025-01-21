@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Users, Package, AlertTriangle } from "lucide-react";
+import { BarChart, Users, Package, AlertTriangle, TrendingUp, CheckCircle } from "lucide-react";
+import { Progress } from "@/components/ui/progress"
 
 interface DashboardData {
+  verificationRate: number | null | undefined;
   totalProducts: number;
   verifiedToday: number;
   addedThisWeek: number;
@@ -66,24 +68,30 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{dashboardData.totalProducts}</div>
+            <p className="text-xs text-muted-foreground">+{dashboardData.addedThisWeek} this week</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Verified Today</CardTitle>
-            <BarChart className="h-4 w-4 text-muted-foreground" />
+            <CheckCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{dashboardData.verifiedToday}</div>
+            <Progress value={dashboardData.verificationRate} className="mt-2" />
+            <p className="text-xs text-muted-foreground mt-1">{dashboardData.verificationRate}% verification rate</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Added This Week</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{dashboardData.addedThisWeek}</div>
+            <p className="text-xs text-muted-foreground">
+              {((dashboardData.addedThisWeek / dashboardData.totalProducts) * 100).toFixed(1)}% of total products
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -93,6 +101,9 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{dashboardData.expiringSoon}</div>
+            <p className="text-xs text-muted-foreground">
+              {((dashboardData.expiringSoon / dashboardData.totalProducts) * 100).toFixed(1)}% of total products
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -115,5 +126,5 @@ export default function Dashboard() {
         </Card>
       )}
     </div>
-  );
+  )
 }

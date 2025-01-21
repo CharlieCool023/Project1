@@ -6,13 +6,13 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { ChevronLeft, ChevronRight, LayoutDashboard, Plus, Search, List, Settings } from 'lucide-react'
+import { ChevronLeft, ChevronRight, LayoutDashboard, Plus, Search, List, Settings, Layers } from "lucide-react"
 
 const sidebarItems = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Add Products", href: "/add-products", icon: Plus },
   { name: "Verify Products", href: "/verify-products", icon: Search },
-  { name: "View All Products", href: "/view-products", icon: List },
+  { name: "Verify Multiple Products", href: "/verify-multiple-products", icon: Layers },
 ]
 
 export function Sidebar() {
@@ -20,11 +20,13 @@ export function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <div className={cn(
-      "relative flex flex-col border-r bg-card",
-      isCollapsed ? "w-16" : "w-64",
-      "transition-all duration-300 ease-in-out"
-    )}>
+    <div
+      className={cn(
+        "relative flex flex-col border-r bg-card",
+        isCollapsed ? "w-16" : "w-64",
+        "transition-all duration-300 ease-in-out",
+      )}
+    >
       <div className="flex items-center justify-between p-4 border-b">
         {!isCollapsed && <h2 className="text-lg font-semibold">Menu</h2>}
         <Button
@@ -44,7 +46,7 @@ export function Sidebar() {
                 className={cn(
                   "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
                   pathname === item.href ? "bg-accent text-accent-foreground" : "text-muted-foreground",
-                  isCollapsed ? "justify-center" : "justify-start"
+                  isCollapsed ? "justify-center" : "justify-start",
                 )}
               >
                 <item.icon className="h-4 w-4" />
@@ -55,10 +57,12 @@ export function Sidebar() {
         </nav>
       </ScrollArea>
       <div className="border-t p-4">
-        <Button variant="ghost" size="sm" className="w-full justify-start">
-          <Settings className="mr-2 h-4 w-4" />
-          {!isCollapsed && <span>Settings</span>}
-        </Button>
+        <Link href="/settings">
+          <Button variant="ghost" size="sm" className="w-full justify-start">
+            <Settings className="mr-2 h-4 w-4" />
+            {!isCollapsed && <span>Settings</span>}
+          </Button>
+        </Link>
       </div>
     </div>
   )

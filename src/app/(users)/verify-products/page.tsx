@@ -1,20 +1,24 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { QrCode, Search } from "lucide-react"
-import { toast, useToast } from "@/hooks/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import { getProductFromBlockchain } from "@/lib/kaleido"
 import { getIPFSImageUrl } from "@/lib/ipfs"
 import { Html5QrcodeScanner } from "html5-qrcode"
-import { useUser } from "@clerk/nextjs"  // Import useUser hook from Clerk
+import React from "react"
 
-function QrScanner({ onResult }: { onResult: (result: string) => void }) {
-  const scannerRef = useRef<HTMLDivElement>(null)
+interface QrScannerProps {
+  onResult: (result: string) => void
+}
 
-  useEffect(() => {
+function QrScanner({ onResult }: QrScannerProps) {
+  const scannerRef = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
     if (scannerRef.current) {
       const scanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: 250 }, false)
       scanner.render((decodedText) => {
@@ -32,17 +36,10 @@ function QrScanner({ onResult }: { onResult: (result: string) => void }) {
 }
 
 export default function VerifyProducts() {
-  const { isSignedIn, isLoaded } = useUser() // Check if the user is signed in and if the user data is loaded
   const [productId, setProductId] = useState("")
   const [showScanner, setShowScanner] = useState(false)
   const router = useRouter()
-
-  // If the user is not signed in and the user data is loaded, redirect to the sign-in page
-  useEffect(() => {
-    if (isLoaded && !isSignedIn) {
-      router.push("/sign-in")  // Adjust the path to your sign-in page
-    }
-  }, [isLoaded, isSignedIn, router])
+  const { toast } = useToast()
 
   const handleVerify = async () => {
     try {
@@ -103,3 +100,4 @@ export default function VerifyProducts() {
     </div>
   )
 }
+
