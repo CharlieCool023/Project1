@@ -10,7 +10,6 @@ import { QRCodeSVG } from "qrcode.react";
 import { useToast } from "@/hooks/use-toast";
 import { useSearchParams } from "next/navigation";
 
-// Component for rendering the product details and handling the loading state
 const AdditionSuccessContent = ({ batchNumber }: { batchNumber: string }) => {
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -96,10 +95,6 @@ const AdditionSuccessContent = ({ batchNumber }: { batchNumber: string }) => {
 export default function AdditionSuccess() {
   const searchParams = useSearchParams();
   const batchNumber = searchParams.get("id") ?? "";
-
-  if (!batchNumber) {
-    return <div>Batch number not found.</div>;
-  }
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
