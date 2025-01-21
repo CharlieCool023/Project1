@@ -105,7 +105,7 @@ const VerificationPage = () => {
                 />
                 <button
                   onClick={handleVerify}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700"
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 flex"
                 >
                   <Search className="inline-block h-5 w-5" /> Verify
                 </button>
