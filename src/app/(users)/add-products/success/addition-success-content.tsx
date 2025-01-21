@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
-import { ProductDetails } from "@/app/components/product-details"
+import { ProductDetails } from "@/app/(users)/components/product-details"
 import { Button } from "@/components/ui/button"
 import { CheckCircle, AlertCircle } from "lucide-react"
 import Link from "next/link"
