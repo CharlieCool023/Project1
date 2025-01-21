@@ -97,6 +97,10 @@ export default function AdditionSuccess() {
   const searchParams = useSearchParams();
   const batchNumber = searchParams.get("id") ?? "";
 
+  if (!batchNumber) {
+    return <div>Batch number not found.</div>;
+  }
+
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <AdditionSuccessContent batchNumber={batchNumber} />
