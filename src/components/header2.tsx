@@ -21,7 +21,7 @@ const heading = () => {
         <div>
           {/* Show UserButton if signed in */}
           <SignedIn>
-            <UserButton />
+            
             <SignOutButton />
           </SignedIn>
           

@@ -11,6 +11,7 @@ import { getIPFSImageUrl } from "@/lib/ipfs";
 import { Html5QrcodeScanner } from "html5-qrcode";
 import { useToast } from "@/hooks/use-toast";
 import router from "next/router";
+import Link from "next/link";
 
 const QrScanner = ({ onResult }: { onResult: (result: string) => void }) => {
   const scannerRef = React.useRef<HTMLDivElement>(null);
@@ -166,12 +167,13 @@ const VerificationPage = () => {
               As an authenticated user, you can access additional features such as managing your products.
             </p>
             <div className="text-center">
+              <Link href="/dashboard">
               <button
-                onClick={() => router.push("/dashboard")}
                 className="bg-purple-600 text-white px-6 py-3 rounded-lg shadow hover:bg-purple-700"
               >
                 Go to Dashboard
               </button>
+              </Link>
             </div>
           </div>
         </SignedIn>
