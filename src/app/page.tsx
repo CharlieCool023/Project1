@@ -8,7 +8,7 @@ import Download from '@/components/download';
 import Footer from '@/components/footer';
 import React from "react";
 
-export default function Home() {
+export default function Home() { 
   return (
     <div className="flex flex-col w-full">
         <Header />

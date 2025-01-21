@@ -47,7 +47,7 @@ const Header: FC = () => {
         hasScrolled && "py-2 bg-black-100 backdrop-blur-[8px]",
       )}
     >
-      <div className="container flex h-14 items-center max-lg:px-5">
+      <div className="container flex h-14 items-center px-5">
         <a className="lg:hidden flex-1 cursor-pointer z-2">
           <Image src="/images/xora.svg" width={115} height={55} alt="logo" />
         </a>
@@ -59,7 +59,7 @@ const Header: FC = () => {
           )}
         >
           <div className="max-lg:relative max-lg:flex max-lg:flex-col max-lg:min-h-screen max-lg:p-6 max-lg:overflow-hidden sidebar-before max-md:px-4">
-            <nav className="max-lg:relative max-lg:z-2 max-lg:my-auto">
+            <nav className="max-lg:relative max-lg:z-2 max-lg:my-auto ">
               <ul className="flex max-lg:block max-lg:px-12">
                 <li className="nav-li">
                   <NavLink title="features" />
@@ -100,7 +100,7 @@ const Header: FC = () => {
               </ul>
             </nav>
 
-            <div className="lg:hidden block absolute top-1/2 left-0 w-[960px] h-[380px] translate-x-[-290px] -translate-y-1/2 rotate-90">
+            <div className="lg:hidden block absolute top-1/2 left-0 w-full h-[380px] translate-x-[-290px] -translate-y-1/2 rotate-90">
               <Image
                 src="/images/bg-outlines.svg"
                 width={960}
