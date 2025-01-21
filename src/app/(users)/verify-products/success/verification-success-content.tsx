@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { CheckCircle, AlertCircle } from "lucide-react"
 import Link from "next/link"
 import { getProductFromBlockchain, type Product } from "@/lib/kaleido"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
 
 export default function VerificationSuccessContent() {
   const [product, setProduct] = useState<Product | null>(null)
