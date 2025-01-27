@@ -92,11 +92,11 @@ const VerificationPage = () => {
             <h1 className="text-3xl font-bold text-center text-blue-600 mb-6">
               Verify Products
             </h1>
-            <p className="text-center text-gray-600 mb-6">
+            <p className="text-center mb-6">
               Use the product ID or scan a QR code to verify the authenticity of your product.
             </p>
             <div className="flex flex-col items-center space-y-4">
-              <div className="flex w-full space-x-2">
+              <div className="flex w-full space-x-2 container">
                 <input
                   type="text"
                   placeholder="Enter Product ID"
