@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { QrCode, Search } from "lucide-react"
+import { QrCode, Search, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { getProductFromBlockchain } from "@/lib/kaleido"
 import { getIPFSImageUrl } from "@/lib/ipfs"
@@ -38,10 +38,12 @@ function QrScanner({ onResult }: QrScannerProps) {
 export default function VerifyProducts() {
   const [productId, setProductId] = useState("")
   const [showScanner, setShowScanner] = useState(false)
+  const [isVerifying, setIsVerifying] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
 
   const handleVerify = async () => {
+    setIsVerifying(true)
     try {
       const product = await getProductFromBlockchain(productId)
       if (product) {
@@ -64,6 +66,8 @@ export default function VerifyProducts() {
         description: "Failed to verify product. Please try again later.",
         variant: "destructive",
       })
+    } finally {
+      setIsVerifying(false)
     }
   }
 
@@ -82,8 +86,17 @@ export default function VerifyProducts() {
           value={productId}
           onChange={(e) => setProductId(e.target.value)}
         />
-        <Button onClick={handleVerify}>
-          <Search className="mr-2 h-4 w-4" /> Verify
+        <Button onClick={handleVerify} disabled={isVerifying}>
+          {isVerifying ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Verifying...
+            </>
+          ) : (
+            <>
+              <Search className="mr-2 h-4 w-4" /> Verify
+            </>
+          )}
         </Button>
       </div>
       <div className="text-center">

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -11,14 +11,15 @@ import { Input } from "@/components/ui/input"
 import { toast } from "@/hooks/use-toast"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { uploadToIPFS } from "@/lib/ipfs"
-import { addProductToBlockchain, getProductFromBlockchain } from "@/lib/kaleido"
-import { Loader2 } from 'lucide-react'
-import { useAuth } from '@clerk/clerk-react'  // Import Clerk's useAuth hook
+import { addProductToBlockchain, generateShortProductID } from "@/lib/kaleido"
+import { Loader2 } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { useUser } from "@clerk/nextjs"
 
 const formSchema = z.object({
   batchNumber: z.string().min(1, { message: "Batch number is required." }),
-  productName: z.string().min(2, { message: "Product name must be at least 2 characters." }),
-  manufacturingDate: z.string().min(1, { message: "Manufacturing date is required." }),
+  name: z.string().min(2, { message: "Product name must be at least 2 characters." }),
+  productionDate: z.string().min(1, { message: "Production date is required." }),
   expiryDate: z.string().min(1, { message: "Expiry date is required." }),
   nafdacNumber: z.string().min(1, { message: "NAFDAC number is required." }),
   productImage: z.instanceof(File).optional(),
@@ -27,86 +28,21 @@ const formSchema = z.object({
 export default function AddProductForm() {
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showConfirmation, setShowConfirmation] = useState(false)
+  const [productData, setProductData] = useState<z.infer<typeof formSchema> | null>(null)
   const router = useRouter()
-
-  // Clerk authentication hook
-  const { isSignedIn } = useAuth() 
-
-  // Redirect to sign-in if not authenticated
-  useEffect(() => {
-    if (!isSignedIn) {
-      router.push('/sign-in')  // Redirect to sign-in page if not authenticated
-    }
-  }, [isSignedIn, router])
+  const { user } = useUser()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       batchNumber: "",
-      productName: "",
-      manufacturingDate: "",
+      name: "",
+      productionDate: "",
       expiryDate: "",
       nafdacNumber: "",
     },
   })
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true)
-    try {
-      let imageHash = "";
-      if (values.productImage) {
-        imageHash = await uploadToIPFS(values.productImage);
-        console.log('Image uploaded to IPFS:', imageHash);
-      }
-
-      console.log('Sending product data to blockchain:', {
-        batchNumber: values.batchNumber,
-        productName: values.productName,
-        manufacturingDate: values.manufacturingDate,
-        expiryDate: values.expiryDate,
-        nafdacNumber: values.nafdacNumber,
-        productImage: imageHash
-      });
-
-      const batchNumber = await addProductToBlockchain(
-        values.batchNumber,
-        values.productName,
-        values.manufacturingDate,
-        values.expiryDate,
-        values.nafdacNumber,
-        imageHash
-      );
-
-      console.log('Product added successfully, Batch Number:', batchNumber);
-
-      // Attempt to retrieve the product details immediately after adding
-      const productDetails = await getProductFromBlockchain(batchNumber);
-      console.log('Retrieved product details:', productDetails);
-
-      if (productDetails) {
-        toast({
-          title: "Product added successfully",
-          description: `Batch Number: ${batchNumber}`,
-        });
-        router.push(`/add-products/success?id=${batchNumber}`);
-      } else {
-        throw new Error('Product added but details could not be retrieved. Please try verifying the product.');
-      }
-    } catch (error) {
-      console.error('Failed to add product:', error);
-      let errorMessage = 'Failed to add product. Please try again.';
-      if (error instanceof Error) {
-        errorMessage += ' Error: ' + error.message;
-      }
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -117,6 +53,74 @@ export default function AddProductForm() {
       }
       reader.readAsDataURL(file)
       form.setValue("productImage", file)
+    }
+  }
+
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    setProductData(values)
+    setShowConfirmation(true)
+  }
+
+  const handleConfirm = async () => {
+    if (!productData || !user) return
+
+    setIsSubmitting(true)
+    try {
+      let imageHash = ""
+      if (productData.productImage) {
+        imageHash = await uploadToIPFS(productData.productImage)
+        console.log("Image uploaded to IPFS:", imageHash)
+      }
+
+      const productID = generateShortProductID()
+      const timestamp = new Date().toISOString()
+      const producer = `${user.firstName} ${user.lastName}`.trim()
+
+      console.log("Sending product data to blockchain:", {
+        productID,
+        batchNumber: productData.batchNumber,
+        name: productData.name,
+        productionDate: productData.productionDate,
+        expiryDate: productData.expiryDate,
+        nafdacNumber: productData.nafdacNumber,
+        timestamp,
+        producer,
+        productImage: imageHash,
+      })
+
+      const addedProductID = await addProductToBlockchain(
+        productID,
+        productData.batchNumber,
+        productData.name,
+        productData.productionDate,
+        productData.expiryDate,
+        productData.nafdacNumber,
+        timestamp,
+        producer,
+        imageHash,
+      )
+
+      console.log("Product added successfully, Product ID:", addedProductID)
+
+      toast({
+        title: "Product added successfully",
+        description: `Product ID: ${addedProductID}`,
+      })
+      router.push(`/add-products/success?id=${addedProductID}`)
+    } catch (error) {
+      console.error("Failed to add product:", error)
+      let errorMessage = "Failed to add product. Please try again."
+      if (error instanceof Error) {
+        errorMessage += " Error: " + error.message
+      }
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      })
+    } finally {
+      setIsSubmitting(false)
+      setShowConfirmation(false)
     }
   }
 
@@ -143,7 +147,7 @@ export default function AddProductForm() {
             />
             <FormField
               control={form.control}
-              name="productName"
+              name="name"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Product Name</FormLabel>
@@ -156,10 +160,10 @@ export default function AddProductForm() {
             />
             <FormField
               control={form.control}
-              name="manufacturingDate"
+              name="productionDate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Manufacturing Date</FormLabel>
+                  <FormLabel>Production Date</FormLabel>
                   <FormControl>
                     <Input type="date" {...field} />
                   </FormControl>
@@ -201,11 +205,7 @@ export default function AddProductForm() {
                   <FormLabel>Product Image</FormLabel>
                   <FormControl>
                     <div className="flex items-center space-x-4">
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                      />
+                      <Input type="file" accept="image/*" onChange={handleImageChange} />
                       {imagePreview && (
                         <img
                           src={imagePreview || "/placeholder.svg"}
@@ -219,19 +219,61 @@ export default function AddProductForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit">Preview Product</Button>
+          </form>
+        </Form>
+      </CardContent>
+
+      <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Product Details</DialogTitle>
+          </DialogHeader>
+          {productData && user && (
+            <div className="space-y-4">
+              <p>
+                <strong>Batch Number:</strong> {productData.batchNumber}
+              </p>
+              <p>
+                <strong>Product Name:</strong> {productData.name}
+              </p>
+              <p>
+                <strong>Production Date:</strong> {productData.productionDate}
+              </p>
+              <p>
+                <strong>Expiry Date:</strong> {productData.expiryDate}
+              </p>
+              <p>
+                <strong>NAFDAC Number:</strong> {productData.nafdacNumber}
+              </p>
+              <p>
+                <strong>Producer:</strong> {`${user.firstName} ${user.lastName}`.trim()}
+              </p>
+              {imagePreview && (
+                <img
+                  src={imagePreview || "/placeholder.svg"}
+                  alt="Product preview"
+                  className="w-32 h-32 object-cover rounded-md"
+                />
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button onClick={() => setShowConfirmation(false)}>Cancel</Button>
+            <Button onClick={handleConfirm} disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Adding Product...
                 </>
               ) : (
-                'Add Product'
+                "Confirm and Add Product"
               )}
             </Button>
-          </form>
-        </Form>
-      </CardContent>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   )
 }
+

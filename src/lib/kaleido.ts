@@ -1,11 +1,14 @@
 import axios from "axios"
 
 export interface Product {
+  productID: string
   batchNumber: string
-  productName: string
-  manufacturingDate: string
+  name: string
+  productionDate: string
   expiryDate: string
   nafdacNumber: string
+  timestamp: string
+  producer: string
   productImage: string
 }
 
@@ -28,31 +31,40 @@ const axiosInstance = axios.create({
 })
 
 export async function addProductToBlockchain(
+  productID: string,
   batchNumber: string,
-  productName: string,
-  manufacturingDate: string,
+  name: string,
+  productionDate: string,
   expiryDate: string,
   nafdacNumber: string,
+  timestamp: string,
+  producer: string,
   productImage: string,
 ): Promise<string> {
   try {
     console.log("Sending request to blockchain:", {
+      productID,
       batchNumber,
-      productName,
-      manufacturingDate,
+      name,
+      productionDate,
       expiryDate,
       nafdacNumber,
+      timestamp,
+      producer,
       productImage,
     })
 
     const response = await axiosInstance.post(
       `/${KALEIDO_CONTRACT_ADDRESS}/addProduct`,
       {
+        productID,
         batchNumber,
-        productName,
-        manufacturingDate,
+        name,
+        productionDate,
         expiryDate,
         nafdacNumber,
+        timestamp,
+        producer,
         productImage,
       },
       {
@@ -70,8 +82,8 @@ export async function addProductToBlockchain(
       throw new Error(`Failed to add product to blockchain: ${response.status} ${JSON.stringify(response.data)}`)
     }
 
-    // Return the batchNumber as the product ID
-    return batchNumber
+    // Return the productID
+    return productID
   } catch (error) {
     console.error("Error adding product to blockchain:", error)
     if (axios.isAxiosError(error)) {
@@ -96,12 +108,12 @@ export async function addProductToBlockchain(
   }
 }
 
-export async function getProductFromBlockchain(productId: string): Promise<Product | null> {
+export async function getProductFromBlockchain(productID: string): Promise<Product | null> {
   try {
     const response = await axiosInstance.post(
       `/${KALEIDO_CONTRACT_ADDRESS}/getProduct`,
       {
-        batchNumber: productId,
+        productID: productID,
       },
       {
         params: {
@@ -116,7 +128,7 @@ export async function getProductFromBlockchain(productId: string): Promise<Produ
 
     if (response.data && response.data.output) {
       const product = response.data.output
-      if (typeof product === "object" && product.batchNumber && product.batchNumber !== "") {
+      if (typeof product === "object" && product.productID && product.productID !== "") {
         return product as Product
       }
     }
@@ -135,5 +147,15 @@ export async function getProductFromBlockchain(productId: string): Promise<Produ
       throw new Error("Failed to get product from blockchain: Unknown error")
     }
   }
+}
+
+export function generateShortProductID(): string {
+  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+  const length = 8
+  let result = ""
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length))
+  }
+  return result
 }
 

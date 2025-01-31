@@ -14,15 +14,15 @@ export default function VerificationSuccessContent() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const searchParams = useSearchParams()
-  const productId = searchParams.get("id")
+  const productID = searchParams.get("id")
   const { toast } = useToast()
 
   useEffect(() => {
     async function fetchProduct() {
       try {
-        if (productId) {
-          console.log("Fetching product with ID:", productId)
-          const productDetails = await getProductFromBlockchain(productId)
+        if (productID) {
+          console.log("Fetching product with ID:", productID)
+          const productDetails = await getProductFromBlockchain(productID)
           console.log("Product details:", productDetails)
           if (productDetails) {
             setProduct(productDetails)
@@ -46,7 +46,7 @@ export default function VerificationSuccessContent() {
       }
     }
     fetchProduct()
-  }, [productId, toast])
+  }, [productID, toast])
 
   if (isLoading) {
     return <div>Loading product details...</div>
@@ -76,12 +76,14 @@ export default function VerificationSuccessContent() {
         <h1 className="text-3xl font-bold">Verification Successful</h1>
       </div>
       <ProductDetails
-        productId={productId || ""}
+        productID={product.productID}
         batchNumber={product.batchNumber}
-        productName={product.productName}
-        manufacturingDate={product.manufacturingDate}
+        name={product.name}
+        productionDate={product.productionDate}
         expiryDate={product.expiryDate}
         nafdacNumber={product.nafdacNumber}
+        timestamp={product.timestamp}
+        producer={product.producer}
         productImage={product.productImage}
       />
       <div className="flex justify-center">

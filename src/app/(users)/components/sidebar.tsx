@@ -9,7 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { ChevronLeft, ChevronRight, LayoutDashboard, Plus, Search, List, Settings, Layers } from "lucide-react"
 
 const sidebarItems = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Add Products", href: "/add-products", icon: Plus },
   { name: "Verify Products", href: "/verify-products", icon: Search },
   { name: "Verify Multiple Products", href: "/verify-multiple-products", icon: Layers },

@@ -15,15 +15,15 @@ export default function AdditionSuccessContent() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const searchParams = useSearchParams()
-  const batchNumber = searchParams.get("id")
+  const productID = searchParams.get("id")
   const { toast } = useToast()
 
   useEffect(() => {
     async function fetchProduct() {
       try {
-        if (batchNumber) {
-          console.log("Fetching product with batch number:", batchNumber)
-          const productDetails = await getProductFromBlockchain(batchNumber)
+        if (productID) {
+          console.log("Fetching product with ID:", productID)
+          const productDetails = await getProductFromBlockchain(productID)
           console.log("Product details:", productDetails)
           if (productDetails) {
             setProduct(productDetails)
@@ -31,7 +31,7 @@ export default function AdditionSuccessContent() {
             throw new Error("Product details not available. The product may have been added, but retrieval failed.")
           }
         } else {
-          throw new Error("No batch number provided.")
+          throw new Error("No product ID provided.")
         }
       } catch (error) {
         console.error("Error fetching product:", error)
@@ -47,7 +47,7 @@ export default function AdditionSuccessContent() {
       }
     }
     fetchProduct()
-  }, [batchNumber, toast])
+  }, [productID, toast])
 
   if (isLoading) {
     return <div>Loading product details...</div>
@@ -77,18 +77,20 @@ export default function AdditionSuccessContent() {
         <h1 className="text-3xl font-bold">Product Added Successfully</h1>
       </div>
       <ProductDetails
-        productId={batchNumber || ""}
+        productID={product.productID}
         batchNumber={product.batchNumber}
-        productName={product.productName}
-        manufacturingDate={product.manufacturingDate}
+        name={product.name}
+        productionDate={product.productionDate}
         expiryDate={product.expiryDate}
         nafdacNumber={product.nafdacNumber}
+        timestamp={product.timestamp}
+        producer={product.producer}
         productImage={product.productImage}
       />
       <div className="flex justify-center items-center space-x-4">
         <div className="text-center">
           <h2 className="text-xl font-semibold mb-2">Product QR Code</h2>
-          <QRCodeSVG value={batchNumber || ""} size={150} />
+          <QRCodeSVG value={product.productID} size={150} />
         </div>
         <Link href="/add-products">
           <Button>Add Another Product</Button>

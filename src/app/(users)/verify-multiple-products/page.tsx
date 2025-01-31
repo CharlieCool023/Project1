@@ -95,8 +95,10 @@ export default function VerifyMultipleProducts() {
               <TableHead>Name</TableHead>
               <TableHead>Batch Number</TableHead>
               <TableHead>NAFDAC Number</TableHead>
-              <TableHead>Manufacturing Date</TableHead>
+              <TableHead>Production Date</TableHead>
               <TableHead>Expiry Date</TableHead>
+              <TableHead>Producer</TableHead>
+              <TableHead>Added On</TableHead>
               <TableHead>Status</TableHead>
             </TableRow>
           </TableHeader>
@@ -104,11 +106,15 @@ export default function VerifyMultipleProducts() {
             {verifiedProducts.map((product, index) => (
               <TableRow key={index}>
                 <TableCell>{productIds[index]}</TableCell>
-                <TableCell>{product?.productName || "N/A"}</TableCell>
+                <TableCell>{product?.name || "N/A"}</TableCell>
                 <TableCell>{product?.batchNumber || "N/A"}</TableCell>
                 <TableCell>{product?.nafdacNumber || "N/A"}</TableCell>
-                <TableCell>{product?.manufacturingDate || "N/A"}</TableCell>
-                <TableCell>{product?.expiryDate || "N/A"}</TableCell>
+                <TableCell>
+                  {product?.productionDate ? new Date(product.productionDate).toLocaleDateString() : "N/A"}
+                </TableCell>
+                <TableCell>{product?.expiryDate ? new Date(product.expiryDate).toLocaleDateString() : "N/A"}</TableCell>
+                <TableCell>{product?.producer || "N/A"}</TableCell>
+                <TableCell>{product?.timestamp ? new Date(product.timestamp).toLocaleString() : "N/A"}</TableCell>
                 <TableCell>{product ? "Verified" : "Not Found"}</TableCell>
               </TableRow>
             ))}
