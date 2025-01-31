@@ -7,7 +7,7 @@ import { LoadingAnimation } from "./components/loading-animation"
 import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from "@/components/theme-provider"
 import { ClerkProvider, useAuth } from "@clerk/nextjs"
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation' // Use next/navigation instead of next/router
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -30,7 +30,7 @@ export default function RootLayout({
 
   // Redirect to sign-in page if the user is not signed in
   if (!isSignedIn) {
-    router.push('/sign-in')
+    router.push('/sign-in') 
     return null
   }
 
