@@ -1,13 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { getProductFromBlockchain, type Product } from "@/lib/kaleido"
 import { Loader2, Plus, Search } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { useUser } from "@clerk/nextjs"
+import { useAuth, useUser } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
 
 export default function VerifyMultipleProducts() {
@@ -16,12 +16,15 @@ export default function VerifyMultipleProducts() {
   const [isVerifying, setIsVerifying] = useState(false)
   const { toast } = useToast()
   const router = useRouter()
-  const { isSignedIn } = useUser()
+  const { isSignedIn } = useAuth();
+ 
 
-  if (!isSignedIn) {
-    router.push("/sign-in")
-    return null 
-  }
+  // Redirect unauthenticated users
+  useEffect(() => {
+    if (!isSignedIn) {
+      router.push("/sign-in");
+    }
+  }, [isSignedIn, router]);
   
   const addInputField = () => {
     setProductIds([...productIds, ""])

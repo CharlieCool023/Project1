@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,7 +10,7 @@ import { getProductFromBlockchain } from "@/lib/kaleido"
 import { getIPFSImageUrl } from "@/lib/ipfs"
 import { Html5QrcodeScanner } from "html5-qrcode"
 import React from "react"
-import { useUser } from "@clerk/nextjs"
+import { useAuth, useUser } from "@clerk/nextjs"
 
 interface QrScannerProps {
   onResult: (result: string) => void
@@ -43,12 +43,14 @@ export default function VerifyProducts() {
   const router = useRouter()
   const { toast } = useToast()
 
-  const { isSignedIn } = useUser()
-
-  if (!isSignedIn) {
-    router.push("/sign-in")
-    return null 
-  }
+  const { isSignedIn } = useAuth();
+ 
+  // Redirect unauthenticated users
+  useEffect(() => {
+    if (!isSignedIn) {
+      router.push("/sign-in");
+    }
+  }, [isSignedIn, router]);
   
   const handleVerify = async () => {
     setIsVerifying(true)

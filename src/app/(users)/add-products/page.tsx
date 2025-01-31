@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -14,7 +14,7 @@ import { uploadToIPFS } from "@/lib/ipfs"
 import { addProductToBlockchain, generateShortProductID } from "@/lib/kaleido"
 import { Loader2 } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { useUser } from "@clerk/nextjs"
+import { useAuth, useUser } from "@clerk/nextjs"
 
 const formSchema = z.object({
   batchNumber: z.string().min(1, { message: "Batch number is required." }),
@@ -30,15 +30,18 @@ export default function AddProductForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [productData, setProductData] = useState<z.infer<typeof formSchema> | null>(null)
-  const router = useRouter()
+  const router = useRouter();
   const { user } = useUser()
-  const { isSignedIn } = useUser()
+  const { isSignedIn } = useAuth();
+  
 
-  if (!isSignedIn) {
-    router.push("/sign-in")
-    return null 
-  }
-
+  // Redirect unauthenticated users
+  useEffect(() => {
+    if (!isSignedIn) {
+      router.push("/sign-in");
+    }
+  }, [isSignedIn, router]);
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
