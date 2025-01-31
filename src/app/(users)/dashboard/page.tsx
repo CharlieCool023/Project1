@@ -28,7 +28,7 @@ export default function Dashboard() {
   // Redirect unauthenticated users
   useEffect(() => {
     if (!isSignedIn) {
-      router.push("/sign-in"); // Adjust the path to your sign-in page
+      router.push("/sign-in");
     }
   }, [isSignedIn, router]);
 

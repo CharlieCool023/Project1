@@ -32,6 +32,12 @@ export default function AddProductForm() {
   const [productData, setProductData] = useState<z.infer<typeof formSchema> | null>(null)
   const router = useRouter()
   const { user } = useUser()
+  const { isSignedIn } = useUser()
+
+  if (!isSignedIn) {
+    router.push("/sign-in")
+    return null 
+  }
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

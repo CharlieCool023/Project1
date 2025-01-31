@@ -10,6 +10,7 @@ import { getProductFromBlockchain } from "@/lib/kaleido"
 import { getIPFSImageUrl } from "@/lib/ipfs"
 import { Html5QrcodeScanner } from "html5-qrcode"
 import React from "react"
+import { useUser } from "@clerk/nextjs"
 
 interface QrScannerProps {
   onResult: (result: string) => void
@@ -42,6 +43,13 @@ export default function VerifyProducts() {
   const router = useRouter()
   const { toast } = useToast()
 
+  const { isSignedIn } = useUser()
+
+  if (!isSignedIn) {
+    router.push("/sign-in")
+    return null 
+  }
+  
   const handleVerify = async () => {
     setIsVerifying(true)
     try {

@@ -7,6 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { getProductFromBlockchain, type Product } from "@/lib/kaleido"
 import { Loader2, Plus, Search } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { useUser } from "@clerk/nextjs"
+import router from "next/router"
 
 export default function VerifyMultipleProducts() {
   const [productIds, setProductIds] = useState<string[]>([""])
@@ -14,6 +16,13 @@ export default function VerifyMultipleProducts() {
   const [isVerifying, setIsVerifying] = useState(false)
   const { toast } = useToast()
 
+  const { isSignedIn } = useUser()
+
+  if (!isSignedIn) {
+    router.push("/sign-in")
+    return null 
+  }
+  
   const addInputField = () => {
     setProductIds([...productIds, ""])
   }
