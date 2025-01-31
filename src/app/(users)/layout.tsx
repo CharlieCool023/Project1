@@ -1,3 +1,5 @@
+"use client"
+
 import { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
@@ -7,7 +9,7 @@ import { LoadingAnimation } from "./components/loading-animation"
 import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from "@/components/theme-provider"
 import { ClerkProvider, useAuth } from "@clerk/nextjs"
-import { useRouter } from 'next/navigation' // Use next/navigation instead of next/router
+import { useRouter } from 'next/navigation'
 
 const inter = Inter({ subsets: ["latin"] })
 
