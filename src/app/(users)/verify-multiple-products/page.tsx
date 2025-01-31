@@ -8,14 +8,14 @@ import { getProductFromBlockchain, type Product } from "@/lib/kaleido"
 import { Loader2, Plus, Search } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useUser } from "@clerk/nextjs"
-import router from "next/router"
+import { useRouter } from "next/navigation"
 
 export default function VerifyMultipleProducts() {
   const [productIds, setProductIds] = useState<string[]>([""])
   const [verifiedProducts, setVerifiedProducts] = useState<(Product | null)[]>([])
   const [isVerifying, setIsVerifying] = useState(false)
   const { toast } = useToast()
-
+  const router = useRouter()
   const { isSignedIn } = useUser()
 
   if (!isSignedIn) {
