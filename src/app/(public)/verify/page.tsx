@@ -87,7 +87,7 @@ const VerificationPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col">
       <Heading />
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Unauthenticated Users */}
