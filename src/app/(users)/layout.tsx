@@ -7,12 +7,13 @@ import { LoadingAnimation } from "./components/loading-animation"
 import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from "@/components/theme-provider"
 import { ClerkProvider } from "@clerk/nextjs"
+import type React from "react" 
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Product Verification Dashboard",
-  description: "Verify and manage products",
+  description: "Verify and manage products securely with blockchain technology",
 }
 
 export default function RootLayout({
@@ -30,7 +31,7 @@ export default function RootLayout({
               <Header />
               <div className="flex flex-1 overflow-hidden">
                 <Sidebar />
-                <main className="flex-1 overflow-y-auto p-8">{children}</main>
+                <main className="flex-1 overflow-y-auto bg-background p-8">{children}</main>
               </div>
             </div>
             <Toaster />

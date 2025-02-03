@@ -6,10 +6,10 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { ChevronLeft, ChevronRight, LayoutDashboard, Plus, Search, List, Settings, Layers } from "lucide-react"
+import { ChevronLeft, ChevronRight, LayoutDashboard, Plus, Search, Settings, Layers } from "lucide-react"
 
 const sidebarItems = [
-  { name: "Dashboard", href: "/", icon: LayoutDashboard },
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Add Products", href: "/add-products", icon: Plus },
   { name: "Verify Products", href: "/verify-products", icon: Search },
   { name: "Verify Multiple Products", href: "/verify-multiple-products", icon: Layers },
@@ -22,12 +22,11 @@ export function Sidebar() {
   return (
     <div
       className={cn(
-        "relative flex flex-col border-r bg-card",
+        "relative flex flex-col border-r bg-background transition-all duration-300 ease-in-out",
         isCollapsed ? "w-16" : "w-64",
-        "transition-all duration-300 ease-in-out",
       )}
     >
-      <div className="flex items-center justify-between p-4 border-b">
+      <div className="flex items-center justify-between p-4">
         {!isCollapsed && <h2 className="text-lg font-semibold">Menu</h2>}
         <Button
           variant="ghost"
@@ -44,8 +43,10 @@ export function Sidebar() {
             <Link key={item.name} href={item.href}>
               <span
                 className={cn(
-                  "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
-                  pathname === item.href ? "bg-accent text-accent-foreground" : "text-muted-foreground",
+                  "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  pathname === item.href
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-secondary hover:text-secondary-foreground",
                   isCollapsed ? "justify-center" : "justify-start",
                 )}
               >

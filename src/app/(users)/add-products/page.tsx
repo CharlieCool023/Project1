@@ -1,20 +1,42 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { toast } from "@/hooks/use-toast"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { uploadToIPFS } from "@/lib/ipfs"
-import { addProductToBlockchain, generateShortProductID } from "@/lib/kaleido"
-import { Loader2 } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { useAuth, useUser } from "@clerk/nextjs"
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { toast } from "@/hooks/use-toast";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { uploadToIPFS } from "@/lib/ipfs";
+import {
+  addProductToBlockchain,
+  generateShortProductID,
+} from "@/lib/kaleido";
+import { Loader2, Upload } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { useAuth, useUser } from "@clerk/nextjs";
+import { motion } from "framer-motion";
 
 const formSchema = z.object({
   batchNumber: z.string().min(1, { message: "Batch number is required." }),
@@ -23,25 +45,24 @@ const formSchema = z.object({
   expiryDate: z.string().min(1, { message: "Expiry date is required." }),
   nafdacNumber: z.string().min(1, { message: "NAFDAC number is required." }),
   productImage: z.instanceof(File).optional(),
-})
+});
 
 export default function AddProductForm() {
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [showConfirmation, setShowConfirmation] = useState(false)
-  const [productData, setProductData] = useState<z.infer<typeof formSchema> | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [productData, setProductData] = useState<z.infer<typeof formSchema> | null>(null);
   const router = useRouter();
-  const { user } = useUser()
+  const { user, isLoaded } = useUser();
   const { isSignedIn } = useAuth();
-  
 
   // Redirect unauthenticated users
   useEffect(() => {
-    if (!isSignedIn) {
+    if (isLoaded && !isSignedIn) {
       router.push("/sign-in");
     }
-  }, [isSignedIn, router]);
-  
+  }, [isSignedIn, isLoaded, router]);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -51,39 +72,39 @@ export default function AddProductForm() {
       expiryDate: "",
       nafdacNumber: "",
     },
-  })
+  });
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
+    const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result as string)
-      }
-      reader.readAsDataURL(file)
-      form.setValue("productImage", file)
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      form.setValue("productImage", file);
     }
-  }
+  };
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    setProductData(values)
-    setShowConfirmation(true)
-  }
+    setProductData(values);
+    setShowConfirmation(true);
+  };
 
   const handleConfirm = async () => {
-    if (!productData || !user) return
+    if (!productData || !user) return;
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
-      let imageHash = ""
+      let imageHash = "";
       if (productData.productImage) {
-        imageHash = await uploadToIPFS(productData.productImage)
-        console.log("Image uploaded to IPFS:", imageHash)
+        imageHash = await uploadToIPFS(productData.productImage);
+        console.log("Image uploaded to IPFS:", imageHash);
       }
 
-      const productID = generateShortProductID()
-      const timestamp = new Date().toISOString()
-      const producer = `${user.firstName} ${user.lastName}`.trim()
+      const productID = generateShortProductID();
+      const timestamp = new Date().toISOString();
+      const producer = `${user.firstName} ${user.lastName}`.trim();
 
       console.log("Sending product data to blockchain:", {
         productID,
@@ -95,7 +116,7 @@ export default function AddProductForm() {
         timestamp,
         producer,
         productImage: imageHash,
-      })
+      });
 
       const addedProductID = await addProductToBlockchain(
         productID,
@@ -107,131 +128,162 @@ export default function AddProductForm() {
         timestamp,
         producer,
         imageHash,
-      )
+      );
 
-      console.log("Product added successfully, Product ID:", addedProductID)
+      console.log("Product added successfully, Product ID:", addedProductID);
 
       toast({
         title: "Product added successfully",
         description: `Product ID: ${addedProductID}`,
-      })
-      router.push(`/add-products/success?id=${addedProductID}`)
+      });
+      router.push(`/add-products/success?id=${addedProductID}`);
     } catch (error) {
-      console.error("Failed to add product:", error)
-      let errorMessage = "Failed to add product. Please try again."
+      console.error("Failed to add product:", error);
+      let errorMessage = "Failed to add product. Please try again.";
       if (error instanceof Error) {
-        errorMessage += " Error: " + error.message
+        errorMessage += " Error: " + error.message;
       }
       toast({
         title: "Error",
         description: errorMessage,
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsSubmitting(false)
-      setShowConfirmation(false)
+      setIsSubmitting(false);
+      setShowConfirmation(false);
     }
-  }
+  };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle>Add New Product</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <FormField
-              control={form.control}
-              name="batchNumber"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Batch Number</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter batch number" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Product Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter product name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="productionDate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Production Date</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="expiryDate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Expiry Date</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="nafdacNumber"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>NAFDAC Number</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter NAFDAC number" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="productImage"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Product Image</FormLabel>
-                  <FormControl>
-                    <div className="flex items-center space-x-4">
-                      <Input type="file" accept="image/*" onChange={handleImageChange} />
-                      {imagePreview && (
-                        <img
-                          src={imagePreview || "/placeholder.svg"}
-                          alt="Product preview"
-                          className="w-24 h-24 object-cover rounded-md"
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="container mx-auto px-4 py-8"
+    >
+      <Card className="w-full max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle>Add New Product</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <FormField
+                control={form.control}
+                name="batchNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Batch Number</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter batch number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Product Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter product name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="productionDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Production Date</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="expiryDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Expiry Date</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="nafdacNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>NAFDAC Number</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter NAFDAC number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="productImage"
+                render={() => (
+                  <FormItem>
+                    <FormLabel>Product Image</FormLabel>
+                    <FormControl>
+                      <div className="flex items-center">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageChange}
+                          className="hidden"
+                          id="productImage"
                         />
-                      )}
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit">Preview Product</Button>
-          </form>
-        </Form>
-      </CardContent>
+                        <label
+                          htmlFor="productImage"
+                          className="flex items-center justify-center w-full h-32 px-4 transition border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-gray-400"
+                        >
+                          {imagePreview ? (
+                            <img
+                              src={imagePreview}
+                              alt="Product preview"
+                              className="w-full h-full object-contain"
+                            />
+                          ) : (
+                            <span className="flex items-center space-x-2">
+                              <Upload className="w-6 h-6 text-gray-600" />
+                              <span className="font-medium text-gray-600">Click to upload product image</span>
+                            </span>
+                          )}
+                        </label>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Button type="submit" className="w-full">
+                Preview Product
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
 
       <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
         <DialogContent>
@@ -260,7 +312,7 @@ export default function AddProductForm() {
               </p>
               {imagePreview && (
                 <img
-                  src={imagePreview || "/placeholder.svg"}
+                  src={imagePreview}
                   alt="Product preview"
                   className="w-32 h-32 object-cover rounded-md"
                 />
@@ -268,7 +320,9 @@ export default function AddProductForm() {
             </div>
           )}
           <DialogFooter>
-            <Button onClick={() => setShowConfirmation(false)}>Cancel</Button>
+            <Button onClick={() => setShowConfirmation(false)} variant="outline">
+              Cancel
+            </Button>
             <Button onClick={handleConfirm} disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
@@ -282,7 +336,6 @@ export default function AddProductForm() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </Card>
-  )
+    </motion.div>
+  );
 }
-
