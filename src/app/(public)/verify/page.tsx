@@ -167,8 +167,8 @@ const VerificationPage = () => {
                 <h3 className="text-lg font-medium text-gray-700 mb-4">Product Details:</h3>
                 <div className="space-y-3 text-gray-800">
                   <p><span className="font-semibold">Batch Number:</span> {product.batchNumber}</p>
-                  <p><span className="font-semibold">Product Name:</span> {product.productName}</p>
-                  <p><span className="font-semibold">Manufacturing Date:</span> {product.manufacturingDate}</p>
+                  <p><span className="font-semibold">Product Name:</span> {product.name}</p>
+                  <p><span className="font-semibold">Manufacturing Date:</span> {product.productionDate}</p>
                   <p><span className="font-semibold">Expiry Date:</span> {product.expiryDate}</p>
                   <p><span className="font-semibold">NAFDAC Number:</span> {product.nafdacNumber}</p>
                   <p><span className="font-semibold">Quantity:</span> 200</p>
